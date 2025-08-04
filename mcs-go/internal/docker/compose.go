@@ -78,6 +78,7 @@ const dockerComposeTemplate = `services:
       - ./logs:/home/coder/logs
       - ${HOME}/.ssh:/home/coder/.ssh:ro
       - ${HOME}/.gitconfig:/home/coder/.gitconfig:ro
+      - ${HOME}/.mcs/config.json:/home/coder/.mcs/config.json:ro
       {{- if .Components }}
       - ./components:/home/coder/.components:ro
       - ./init:/docker-entrypoint-initdb.d:ro

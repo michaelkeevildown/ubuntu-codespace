@@ -17,6 +17,9 @@ var (
 
 	//go:embed installers/github-cli.sh
 	githubCLIInstaller string
+
+	//go:embed helpers/mcs-get-token.sh
+	mcsGetTokenHelper string
 )
 
 // installerMap maps component IDs to their installer content
@@ -50,6 +53,12 @@ func ExtractInstallers(targetDir string) error {
 		if err := os.WriteFile(path, []byte(content), 0755); err != nil {
 			return fmt.Errorf("failed to write installer %s: %w", filename, err)
 		}
+	}
+
+	// Also extract the mcs-get-token helper
+	helperPath := filepath.Join(targetDir, "mcs-get-token.sh")
+	if err := os.WriteFile(helperPath, []byte(mcsGetTokenHelper), 0755); err != nil {
+		return fmt.Errorf("failed to write mcs-get-token helper: %w", err)
 	}
 
 	return nil

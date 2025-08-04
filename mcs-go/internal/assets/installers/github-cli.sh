@@ -112,12 +112,27 @@ install_binary() {
 configure() {
     echo "Configuring GitHub CLI..."
     
-    # Check if token is available
-    local token_file="/home/coder/.tokens/github.token"
+    # Try to get token from MCS config using helper script
+    local token=""
+    local mcs_helper="/home/coder/.components/mcs-get-token.sh"
     
-    if [ -f "$token_file" ] && [ -s "$token_file" ]; then
-        local token=$(cat "$token_file")
-        
+    # First, try the helper script if available
+    if [ -x "$mcs_helper" ]; then
+        echo "Using MCS token helper..."
+        token=$("$mcs_helper" 2>/dev/null || echo "")
+    fi
+    
+    # Fallback to legacy token file location
+    if [ -z "$token" ]; then
+        local token_file="/home/coder/.tokens/github.token"
+        if [ -f "$token_file" ] && [ -s "$token_file" ]; then
+            echo "Using legacy token file..."
+            token=$(cat "$token_file")
+        fi
+    fi
+    
+    # If we have a token, configure GitHub CLI
+    if [ -n "$token" ]; then
         # Configure gh with token
         echo "$token" | gh auth login --with-token
         
@@ -141,9 +156,10 @@ configure() {
             return 1
         fi
     else
-        echo "GitHub token not found at $token_file"
+        echo "GitHub token not found"
         echo "GitHub CLI installed but not authenticated"
-        echo "To authenticate manually, run: gh auth login"
+        echo "To set token on host: mcs config set github-token <token>"
+        echo "To authenticate manually: gh auth login"
     fi
     
     # Set up git credential helper to use gh
